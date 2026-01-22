@@ -7,6 +7,7 @@ const App = () => {
   return (
     <View style={{flex:1,backgroundColor:'red',alignItems:'center',justifyContent:'center'}}>
       <Text style={{fontSize:35}}>App</Text>
+      <Text style={{fontSize:35}}>Habit Builder</Text>
     </View>
   )
 }
