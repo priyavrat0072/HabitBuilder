@@ -11,9 +11,10 @@ const RootNavigator = () => {
    <Stack.Navigator 
         initialRouteName='Home'
         screenOptions={{headerShown:false}}
+     // options={{headerShown:false}}
    >
-        <Stack.Screen name='Home' component={HomeScreen} options={{headerShown:false}} />
-        <Stack.Screen name='CreateHabit' component={CreateHabit} options={{headerShown:false}}/>
+        <Stack.Screen name='Home' component={HomeScreen}  />
+        <Stack.Screen name='CreateHabit' component={CreateHabit}/>
    </Stack.Navigator>
   )
 }
