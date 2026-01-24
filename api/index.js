@@ -23,3 +23,24 @@ mongoose.connect(mongoURI).then(() => {
 app.listen(port, () => {
     console.log("Server running on port 3000")
 })
+
+const Habit = require('./models/habit')
+// endpoints to create a habit in the backend
+
+app.post("habits",async(req,res)=>{
+    try{
+        const {title,color,repeatMode,reminder} = req.body;
+        const newHabit = new Habit({
+            title,
+            color,
+            repeatMode,
+            reminder
+        })
+
+        const savedHabit = await newHabit.save()
+        res.status(200).json(savedHabit)
+        
+    }catch(error){
+        res.status(500).json({error:'Network error'})
+    }
+})
