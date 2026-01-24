@@ -9,7 +9,7 @@ const Stack = createNativeStackNavigator()
 const RootNavigator = () => {
   return (
    <Stack.Navigator 
-        initialRouteName='Home'
+        initialRouteName='CreateHabit'
         screenOptions={{headerShown:false}}
      // options={{headerShown:false}}
    >
