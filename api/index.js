@@ -27,7 +27,7 @@ app.listen(port, () => {
 const Habit = require('./models/habit')
 // endpoints to create a habit in the backend
 
-app.post("habits",async(req,res)=>{
+app.post("/habits",async(req,res)=>{
     try{
         const {title,color,repeatMode,reminder} = req.body;
         const newHabit = new Habit({
