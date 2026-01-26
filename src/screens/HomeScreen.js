@@ -32,31 +32,35 @@ const HomeScreen = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [selectedHabit, setSelectedHabit] = useState();
 
-  const currentDay = new Date().toLocaleDateString("en-US",{weekday:'short'}).slice(0,3)
-  console.log(`Current Day---`,currentDay)
+  const currentDay = new Date()
+    .toLocaleDateString('en-US', { weekday: 'short' })
+    .slice(0, 3);
+  console.log(`Current Day---`, currentDay);
 
-  const days = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun']
+  const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
-  const deleteHabit =async()=>{
+  const deleteHabit = async () => {
     try {
-      const habitId = selectedHabit._id
-      const response = await axios.delete(`http://localhost:3000/habits/${habitId}`)
-      setHabits(response.data)
+      const habitId = selectedHabit._id;
+      const response = await axios.delete(
+        `http://localhost:3000/habits/${habitId}`,
+      );
+      setHabits(response.data);
       // await fetchHabits()
     } catch (error) {
-      console.log('error:',error)
+      console.log('error:', error);
     }
-  }
+  };
 
   useEffect(() => {
     fetchHabits();
   }, []);
 
   useFocusEffect(
-    useCallback(()=>{
-      fetchHabits()
-    },[])
-  )
+    useCallback(() => {
+      fetchHabits();
+    }, []),
+  );
 
   const fetchHabits = async () => {
     try {
@@ -68,34 +72,41 @@ const HomeScreen = () => {
   };
   console.log(`Habits---`, habits);
 
-  const handleLongPress = (habitId) => {
+  const handleLongPress = habitId => {
     const selectedHabit = habits?.find(habit => habit._id == habitId);
     setSelectedHabit(selectedHabit);
     setIsModalVisible(true);
   };
 
-  const handleCompletion=async()=>{
+  const handleCompletion = async () => {
     try {
-      const habitId = selectedHabit?._id
+      const habitId = selectedHabit?._id;
       const updatedCompletion = {
         ...selectedHabit?.completed,
-        [currentDay] : true
-       }
-       await axios.put(`http://localhost:3000/habits/${habitId}/completed`,{
-        completed:updatedCompletion
-       })
-       await fetchHabits()
-       setIsModalVisible(false)
-
+        [currentDay]: true,
+      };
+      await axios.put(`http://localhost:3000/habits/${habitId}/completed`, {
+        completed: updatedCompletion,
+      });
+      await fetchHabits();
+      setIsModalVisible(false);
     } catch (error) {
-      console.log('error',error)
+      console.log('error', error);
     }
-  }
+  };
 
-   const filteredHabits = habits?.filter((habit) => {
+  const filteredHabits = habits?.filter(habit => {
     return !habit.completed || !habit.completed[currentDay];
   });
-  console.log(`Filtered Habits---`,filteredHabits)
+  console.log(`Filtered Habits---`, filteredHabits);
+
+    const getCompletedDays = (completedObj) => {
+      if(completedObj && typeof completedObj === "object"){
+          return Object.keys(completedObj).filter((day) => completedObj[day]);
+      }
+
+      return [];
+  }
 
   return (
     <>
@@ -177,124 +188,200 @@ const HomeScreen = () => {
           </Pressable>
         </View>
 
-        {option == 'Today' && (filteredHabits.length > 0 ? (
-          <View>
-            {filteredHabits?.map((item, index) => (
+        {option == 'Today' &&
+          (filteredHabits.length > 0 ? (
+            <View>
+              {filteredHabits?.map((item, index) => (
+                <Pressable
+                  onLongPress={() => handleLongPress(item._id)}
+                  key={index}
+                  style={{
+                    marginVertical: 10,
+                    backgroundColor: item?.color,
+                    padding: 12,
+                    borderRadius: 24,
+                  }}
+                >
+                  <Text
+                    style={{
+                      textAlign: 'center',
+                      fontWeight: '500',
+                      color: '#FFFFFF',
+                    }}
+                  >
+                    {item?.title}
+                  </Text>
+                </Pressable>
+              ))}
+            </View>
+          ) : (
+            <View
+              style={{
+                marginTop: 150,
+                justifyContent: 'center',
+                alignItems: 'center',
+                marginBottom: 'auto',
+              }}
+            >
+              <Image
+                style={{ width: 60, height: 60, resizeMode: 'cover' }}
+                source={{
+                  uri: 'https://cdn-icons-png.flaticon.com/128/10609/10609386.png',
+                }}
+              />
+              <Text
+                style={{
+                  fontSize: 20,
+                  fontWeight: '600',
+                  marginTop: 10,
+                  textAlign: 'center',
+                }}
+              >
+                No habits for today
+              </Text>
+
+              <Text
+                style={{
+                  fontSize: 20,
+                  fontWeight: '600',
+                  marginTop: 10,
+                  textAlign: 'center',
+                }}
+              >
+                No habits for today. Create One?
+              </Text>
+
               <Pressable
-                onLongPress={() => handleLongPress(item._id)}
+                onPress={() => navigation.navigate('CreateHabit')}
+                style={{
+                  backgroundColor: '#0071c5',
+                  marginTop: 20,
+                  paddingHorizontal: 20,
+                  paddingVertical: 10,
+                  marginLeft: 'auto',
+                  marginRight: 'auto',
+                  borderRadius: 15,
+                }}
+              >
+                <Text style={{ color: '#FFFFFF' }}>Create</Text>
+              </Pressable>
+            </View>
+          ))}
+        {option == 'Weekly' && (
+          <View>
+            {habits?.map((habit, index) => (
+              <Pressable
                 key={index}
                 style={{
-                  marginVertical: 10,
-                  backgroundColor: item?.color,
-                  padding: 12,
+                  marginTop: 10,
+                  backgroundColor: habit.color,
+                  padding: 15,
                   borderRadius: 24,
                 }}
               >
-                <Text
+                <View
                   style={{
-                    textAlign: 'center',
-                    fontWeight: '500',
-                    color: '#FFFFFF',
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
                   }}
                 >
-                  {item?.title}
-                </Text>
+                  <Text
+                    style={{
+                      fontSize: 15,
+                      fontWeight: '500',
+                      color: '#FFFFFF',
+                    }}
+                  >
+                    {habit.title}
+                  </Text>
+                  <Text style={{ color: '#FFFFFF' }}>{habit.repeatMode}</Text>
+                </View>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'space-evenly',
+                    marginVertical: 10,
+                  }}
+                >
+                  {days.map((day, index) => {
+                    const isCompleted = habit.completed && habit.completed[day];
+                    return (
+                      <Pressable key={index}>
+                        <Text
+                          style={{
+                            color: day === currentDay ? 'red' : 'white',
+                          }}
+                        >
+                          {day}
+                        </Text>
+                        {isCompleted ? (
+                          <FontAwesome
+                            name="circle"
+                            size={27}
+                            style={{ marginTop: 12 }}
+                            color="#FFFFFF"
+                          />
+                        ) : (
+                          <Feather
+                            name="circle"
+                            size={27}
+                            style={{ marginTop: 12 }}
+                            color="#FFFFFF"
+                          />
+                        )}
+                      </Pressable>
+                    );
+                  })}
+                </View>
               </Pressable>
             ))}
           </View>
-        ) : (
-          <View
-            style={{
-              marginTop: 150,
-              justifyContent: 'center',
-              alignItems: 'center',
-              marginBottom: 'auto',
-            }}
-          >
-            <Image
-              style={{ width: 60, height: 60, resizeMode: 'cover' }}
-              source={{
-                uri: 'https://cdn-icons-png.flaticon.com/128/10609/10609386.png',
-              }}
-            />
-            <Text
-              style={{
-                fontSize: 20,
-                fontWeight: '600',
-                marginTop: 10,
-                textAlign: 'center',
-              }}
-            >
-              No habits for today
-            </Text>
+        )}
 
-            <Text
-              style={{
-                fontSize: 20,
-                fontWeight: '600',
-                marginTop: 10,
-                textAlign: 'center',
-              }}
-            >
-              No habits for today. Create One?
-            </Text>
-
-            <Pressable
-              onPress={() => navigation.navigate('CreateHabit')}
-              style={{
-                backgroundColor: '#0071c5',
-                marginTop: 20,
-                paddingHorizontal: 20,
-                paddingVertical: 10,
-                marginLeft: 'auto',
-                marginRight: 'auto',
-                borderRadius: 15,
-              }}
-            >
-              <Text style={{ color: '#FFFFFF' }}>Create</Text>
-            </Pressable>
-          </View>
-        ))}
-        {
-          option == 'Weekly' &&(
+        {option === "Overall" && (
           <View>
-            {
-              habits?.map((habit,index)=>(
-                <Pressable key={index}
-                  style={{marginTop:10,backgroundColor:habit.color,padding:15,borderRadius:24}}
+            {habits?.map((habit, index) => (
+              <>
+                <Pressable
+                  style={{
+                    marginVertical: 10,
+                    backgroundColor: habit.color,
+                    padding: 15,
+                    borderRadius: 24,
+                  }}
                 >
-                  <View style={{flexDirection:'row',alignItems:'center',justifyContent:'space-between'}}>
-                  <Text style={{fontSize:15,fontWeight:'500',color:'#FFFFFF'}}>{habit.title}</Text>
-                  <Text style={{color:'#FFFFFF'}}>{habit.repeatMode}</Text>
-                </View>
-                <View style={{flexDirection:'row',alignItems:'center',justifyContent:'space-evenly',marginVertical:10}}>
-                  {
-                    days.map((day,index)=>{
-                      const isCompleted = habit.completed && habit.completed[day]
-                      return(
-                        <Pressable key={index}>
-                          <Text style={{color : day === currentDay ? "red" : "white"}}> 
-                            {day}
-                          </Text>
-                          {
-                            isCompleted?(
-                              <FontAwesome name="circle" size={27} style={{marginTop:12}} color='#FFFFFF'/>
-                            ):(
-                               <Feather name="circle" size={27} style={{marginTop:12}} color='#FFFFFF'/>   
-                            )
-                          }
-                        </Pressable>
-                      )
-                    })
-                  }
-                </View>
-                </Pressable>
-              ))
-            }
-          </View>
-          )
-        }
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                    }}
+                  >
+                    <Text
+                      style={{
+                        fontSize: 15,
+                        fontWeight: "500",
+                        color: "white",
+                      }}
+                    >
+                      {habit.title}
+                    </Text>
+                    <Text style={{ color: "white" }}>{habit.repeatMode}</Text>
+                  </View>
 
+                
+                </Pressable>
+
+                <View style={{flexDirection:"row",alignItems:"center",justifyContent:"space-between"}}>
+                    <Text>Completed On</Text>
+                    <Text>{getCompletedDays(habit.completed).join(", ")}</Text>
+                </View>
+              </>
+            ))}
+          </View>
+        )}
       </ScrollView>
 
       <Modal
@@ -313,7 +400,14 @@ const HomeScreen = () => {
             height: 280,
           }}
         >
-          <Text style={{ fontSize: 18, fontWeight: '600', marginBottom: 10, textAlign:'center' }}>
+          <Text
+            style={{
+              fontSize: 18,
+              fontWeight: '600',
+              marginBottom: 10,
+              textAlign: 'center',
+            }}
+          >
             Choose Option
           </Text>
 
