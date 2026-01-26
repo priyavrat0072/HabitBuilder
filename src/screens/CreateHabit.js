@@ -13,8 +13,12 @@ import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import { Keyboard } from 'react-native';
 import axios from 'axios';
+import { useNavigation } from '@react-navigation/native';
 
 const CreateHabit = () => {
+
+  const navigation = useNavigation()
+
   const [selectedColor, setSelectedColor] = useState('');
   const [title, setTitle] = useState('');
 
@@ -43,6 +47,7 @@ const CreateHabit = () => {
 
       if(response.status === 200){
         setTitle('')
+
         Alert.alert('Habit Added!! Keep building')
       }
       console.log("Habit added",response)
@@ -55,7 +60,7 @@ const CreateHabit = () => {
     <View
       style={{ flex: 1, backgroundColor: 'white', padding: 10, paddingTop: 70 }}
     >
-      <Ionicons name="arrow-back" size={27} />
+      <Ionicons name="arrow-back" size={27} onPress={()=>navigation.goBack()} />
       <Text style={{ fontSize: 20 }}>
         Create
         <Text style={{ fontSize: 20, fontWeight: '500' }}> Habits</Text>
