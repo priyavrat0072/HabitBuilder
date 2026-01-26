@@ -6,16 +6,17 @@ import {
   Pressable,
   Image,
 } from 'react-native';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import Feather from 'react-native-vector-icons/Feather';
 import EvilIcons from 'react-native-vector-icons/EvilIcons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import FontAwesome from 'react-native-vector-icons/MaterialIcons';
 import Modal from 'react-native-modal';
 
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useNavigation } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import axios from 'axios';
 // import {
 //   BottomModal,
@@ -34,9 +35,28 @@ const HomeScreen = () => {
   const currentDay = new Date().toLocaleDateString("en-US",{weekday:'short'}).slice(0,3)
   console.log(`Current Day---`,currentDay)
 
+  const days = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun']
+
+  const deleteHabit =async()=>{
+    try {
+      const habitId = selectedHabit._id
+      const response = await axios.delete(`http://localhost:3000/habits/${habitId}`)
+      setHabits(response.data)
+      // await fetchHabits()
+    } catch (error) {
+      console.log('error:',error)
+    }
+  }
+
   useEffect(() => {
     fetchHabits();
   }, []);
+
+  useFocusEffect(
+    useCallback(()=>{
+      fetchHabits()
+    },[])
+  )
 
   const fetchHabits = async () => {
     try {
@@ -72,10 +92,10 @@ const HomeScreen = () => {
     }
   }
 
-  const filterHabits = habits?.filter((habit)=>{
-    return !habit.completed || !habit.completed[currentDay]
-  })
-  console.log(`Filtered Habits---`,filterHabits)
+   const filteredHabits = habits?.filter((habit) => {
+    return !habit.completed || !habit.completed[currentDay];
+  });
+  console.log(`Filtered Habits---`,filteredHabits)
 
   return (
     <>
@@ -157,9 +177,9 @@ const HomeScreen = () => {
           </Pressable>
         </View>
 
-        {option == 'Today' && filterHabits.length > 0 ? (
+        {option == 'Today' && (filteredHabits.length > 0 ? (
           <View>
-            {filterHabits?.map((item, index) => (
+            {filteredHabits?.map((item, index) => (
               <Pressable
                 onLongPress={() => handleLongPress(item._id)}
                 key={index}
@@ -234,7 +254,47 @@ const HomeScreen = () => {
               <Text style={{ color: '#FFFFFF' }}>Create</Text>
             </Pressable>
           </View>
-        )}
+        ))}
+        {
+          option == 'Weekly' &&(
+          <View>
+            {
+              habits?.map((habit,index)=>(
+                <Pressable key={index}
+                  style={{marginTop:10,backgroundColor:habit.color,padding:15,borderRadius:24}}
+                >
+                  <View style={{flexDirection:'row',alignItems:'center',justifyContent:'space-between'}}>
+                  <Text style={{fontSize:15,fontWeight:'500',color:'#FFFFFF'}}>{habit.title}</Text>
+                  <Text style={{color:'#FFFFFF'}}>{habit.repeatMode}</Text>
+                </View>
+                <View style={{flexDirection:'row',alignItems:'center',justifyContent:'space-evenly',marginVertical:10}}>
+                  {
+                    days.map((day,index)=>{
+                      const isCompleted = habit.completed && habit.completed[day]
+                      return(
+                        <Pressable key={index}>
+                          <Text style={{color : day === currentDay ? "red" : "white"}}> 
+                            {day}
+                          </Text>
+                          {
+                            isCompleted?(
+                              <FontAwesome name="circle" size={27} style={{marginTop:12}} color='#FFFFFF'/>
+                            ):(
+                               <Feather name="circle" size={27} style={{marginTop:12}} color='#FFFFFF'/>   
+                            )
+                          }
+                        </Pressable>
+                      )
+                    })
+                  }
+                </View>
+                </Pressable>
+              ))
+            }
+          </View>
+          )
+        }
+
       </ScrollView>
 
       <Modal
@@ -307,6 +367,7 @@ const HomeScreen = () => {
           </Pressable>
 
           <Pressable
+            onPress={deleteHabit}
             style={{
               flexDirection: 'row',
               alignItems: 'center',
